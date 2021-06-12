@@ -633,7 +633,9 @@ static int guac_rdp_handle_connection(guac_client* client) {
     /* Clean up print job, if active */
     if (rdp_client->active_job != NULL) {
         guac_rdp_print_job_kill(rdp_client->active_job);
+        guac_client_log(client, GUAC_LOG_INFO, "+++++++++++ guac_rdp_print_job_kill called.");
         guac_rdp_print_job_free(rdp_client->active_job);
+        guac_client_log(client, GUAC_LOG_INFO, "+++++++++++ guac_rdp_print_job_free called.");
     }
 
     /* Disconnect client and channels */

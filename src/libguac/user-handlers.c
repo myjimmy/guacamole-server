@@ -440,6 +440,10 @@ int __guac_handle_ack(guac_user* user, int argc, char** argv) {
 
     guac_stream* stream;
 
+    // if (strcmp(argv[1], "OK-JAVA2") == 0) {
+        guac_user_log(user, GUAC_LOG_INFO, "++++++++++ %s: argv[0]=%s, argv[1]=%s", __func__, argv[0], argv[1]);
+    // }
+
     /* Parse stream index */
     int stream_index = atoi(argv[0]);
 

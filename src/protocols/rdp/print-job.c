@@ -23,6 +23,7 @@
 #include <guacamole/protocol.h>
 #include <guacamole/socket.h>
 #include <guacamole/stream.h>
+#include <guacamole/timestamp.h>
 #include <guacamole/user.h>
 
 #include <errno.h>
@@ -30,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
 /**
  * The command to run when filtering postscript to produce PDF. This must be
@@ -66,13 +68,17 @@ char* const guac_rdp_pdf_filter_command[] = {
 static void guac_rdp_print_job_set_state(guac_rdp_print_job* job,
         guac_rdp_print_job_state state) {
 
+//    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s, state=%d:STEP-1", __func__, state);
     pthread_mutex_lock(&(job->state_lock));
 
     /* Update stream state, signalling modification */
+//    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s, state=%d:STEP-2", __func__, state);
     job->state = state;
     pthread_cond_signal(&(job->state_modified));
+//    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s, state=%d:STEP-3", __func__, state);
 
     pthread_mutex_unlock(&(job->state_lock));
+//    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s, state=%d:STEP-4", __func__, state);
 
 }
 
@@ -93,9 +99,15 @@ static void guac_rdp_print_job_set_state(guac_rdp_print_job* job,
 static int guac_rdp_print_job_wait_for_ack(guac_rdp_print_job* job) {
 
     /* Wait for ack if stream open and not yet received */
+    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s:STEP-1", __func__);
     pthread_mutex_lock(&(job->state_lock));
-    if (job->state == GUAC_RDP_PRINT_JOB_WAITING_FOR_ACK)
-        pthread_cond_wait(&job->state_modified, &job->state_lock);
+    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s:STEP-2", __func__);
+    if (job->state == GUAC_RDP_PRINT_JOB_WAITING_FOR_ACK) {
+        guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s:STEP-3", __func__);
+        pthread_cond_wait(&(job->state_modified), &(job->state_lock));
+    }
+
+    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s:STEP-4", __func__);
 
     /* Reset state if ack received */
     int got_ack = (job->state == GUAC_RDP_PRINT_JOB_ACK_RECEIVED);
@@ -104,6 +116,7 @@ static int guac_rdp_print_job_wait_for_ack(guac_rdp_print_job* job) {
 
     /* Return whether ack was successfully received */
     pthread_mutex_unlock(&(job->state_lock));
+    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s:STEP-5", __func__);
     return got_ack;
 
 }
@@ -135,11 +148,15 @@ static void* guac_rdp_print_job_begin_stream(guac_user* user, void* data) {
         return NULL;
     }
 
+    guac_client_log(job->client, GUAC_LOG_INFO, "+++++++++++ send_file: stream_index=%d", job->stream->index);
     /* Send document as a PDF file stream */
     guac_protocol_send_file(user->socket, job->stream,
             "application/pdf", job->filename);
 
     guac_socket_flush(user->socket);
+
+    // guac_timestamp_msleep(100);
+
     return NULL;
 
 }
@@ -175,10 +192,14 @@ static void* guac_rdp_print_job_send_blob(guac_user* user, void* data) {
     }
 
     /* Send single blob of print data */
+    guac_client_log(job->client, GUAC_LOG_INFO, "+++++++++++ send_blob: stream_index=%d\n", job->stream->index);
     guac_protocol_send_blob(user->socket, job->stream,
             blob->buffer, blob->length);
 
     guac_socket_flush(user->socket);
+
+    // guac_timestamp_msleep(100);
+
     return NULL;
 
 }
@@ -251,9 +272,12 @@ static int guac_rdp_print_filter_ack_handler(guac_user* user,
 
     guac_rdp_print_job* job = (guac_rdp_print_job*) stream->data;
 
+    guac_client_log(job->client, GUAC_LOG_INFO, "++++++++ %s:message=%s, status=%d", __func__, message, status);
+
     /* Update state for successful acks */
-    if (status == GUAC_PROTOCOL_STATUS_SUCCESS)
+    if (status == GUAC_PROTOCOL_STATUS_SUCCESS) {
         guac_rdp_print_job_set_state(job, GUAC_RDP_PRINT_JOB_ACK_RECEIVED);
+    }
 
     /* Terminate stream if ack signals an error */
     else {
@@ -492,6 +516,7 @@ void* guac_rdp_print_job_alloc(guac_user* user, void* data) {
             guac_rdp_print_job_output_thread, job);
 
     /* Print job allocated successfully */
+    guac_user_log(user, GUAC_LOG_INFO, "++++++++++ %s", __func__);
     return job;
 
 }
@@ -619,23 +644,38 @@ int guac_rdp_print_job_write(guac_rdp_print_job* job,
     job->bytes_received += length;
 
     /* Write data to filter process */
+    guac_user_log(job->user, GUAC_LOG_INFO, "++++++++++ %s", __func__);
     return write(job->input_fd, buffer, length);
 
 }
 
 void guac_rdp_print_job_free(guac_rdp_print_job* job) {
 
+    guac_user* user = job->user;
+    guac_user_log(user, GUAC_LOG_INFO, "++++++++++ %s: STEP-1", __func__);
+
     /* No more input will be provided */
     close(job->input_fd);
 
     /* Wait for job to terminate */
+    guac_user_log(user, GUAC_LOG_INFO, "++++++++++ %s: STEP-2", __func__);
     pthread_join(job->output_thread, NULL);
 
     /* Destroy lock */
+    guac_user_log(user, GUAC_LOG_INFO, "++++++++++ %s: STEP-3", __func__);
     pthread_mutex_destroy(&(job->state_lock));
 
+    /* Destroy cond */
+    pthread_cond_destroy(&(job->state_modified));
+
+    /* No more output will be provided */
+    close(job->output_fd);
+
     /* Free base structure */
+    guac_user_log(user, GUAC_LOG_INFO, "++++++++++ %s: STEP-4", __func__);
     free(job);
+
+    guac_user_log(user, GUAC_LOG_INFO, "++++++++++ %s: STEP-5", __func__);
 
 }
 

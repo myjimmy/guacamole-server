@@ -121,7 +121,9 @@ void guac_rdpdr_process_print_job_close(guac_rdp_common_svc* svc,
 
     /* End print job */
     if (job != NULL) {
+        guac_client_log(client, GUAC_LOG_INFO, "+++++++++++ START: guac_rdp_print_job_free called.");
         guac_rdp_print_job_free(job);
+        guac_client_log(client, GUAC_LOG_INFO, "+++++++++++ END: guac_rdp_print_job_free called.");
         rdp_client->active_job = NULL;
     }
 

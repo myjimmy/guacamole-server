@@ -227,6 +227,8 @@ int guac_parser_read(guac_parser* parser, guac_socket* socket, int usec_timeout)
             retval = guac_socket_read(socket, unparsed_end,
                     buffer_end - unparsed_end);
 
+            printf("+++++++++++++ parsed=%s\n", unparsed_end);
+
             /* Set guac_error if read unsuccessful */
             if (retval < 0) {
                 guac_error = GUAC_STATUS_SEE_ERRNO;
