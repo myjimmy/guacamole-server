@@ -231,6 +231,8 @@ int guac_protocol_send_audio(guac_socket* socket, const guac_stream* stream,
 
     int ret_val;
 
+    printf("++++++++++++ %s\n", __func__);
+
     guac_socket_instruction_begin(socket);
     ret_val = 
            guac_socket_write_string(socket, "5.audio,")

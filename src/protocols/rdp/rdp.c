@@ -120,6 +120,7 @@ BOOL rdp_freerdp_pre_connect(freerdp* instance) {
         || settings->drive_enabled
         || settings->audio_enabled) {
         guac_rdpdr_load_plugin(context);
+        guac_client_log(client, GUAC_LOG_INFO, "+++++++++++ guac_rdpsnd_load_plugin() called");
         guac_rdpsnd_load_plugin(context);
     }
 
@@ -699,6 +700,8 @@ void* guac_rdp_client_thread(void* data) {
     
     /* If audio enabled, choose an encoder */
     if (settings->audio_enabled) {
+
+        guac_client_log(client, GUAC_LOG_INFO, "+++++++++ %s", __func__);
 
         rdp_client->audio = guac_audio_stream_alloc(client, NULL,
                 GUAC_RDP_AUDIO_RATE,

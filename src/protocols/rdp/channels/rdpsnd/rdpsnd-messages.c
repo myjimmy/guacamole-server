@@ -29,9 +29,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 void guac_rdpsnd_formats_handler(guac_rdp_common_svc* svc,
         wStream* input_stream, guac_rdpsnd_pdu_header* header) {
+
+    printf("+++++++++ %s\n", __func__);
 
     int server_format_count;
     int server_version;
@@ -139,6 +142,9 @@ void guac_rdpsnd_formats_handler(guac_rdp_common_svc* svc,
             Stream_Seek(input_stream, body_size);
 
             /* If PCM, accept */
+            printf("+++++++++ %s: index=%d, server_format_count=%d, format=%d (%04x)\n",
+                    __func__, i, server_format_count, format_tag, format_tag);
+
             if (format_tag == WAVE_FORMAT_PCM) {
 
                 /* If can fit another format, accept it */
@@ -230,6 +236,8 @@ void guac_rdpsnd_formats_handler(guac_rdp_common_svc* svc,
 void guac_rdpsnd_training_handler(guac_rdp_common_svc* svc,
         wStream* input_stream, guac_rdpsnd_pdu_header* header) {
 
+    printf("+++++++++ %s\n", __func__);
+
     int data_size;
     wStream* output_stream;
 
@@ -261,6 +269,8 @@ void guac_rdpsnd_training_handler(guac_rdp_common_svc* svc,
 
 void guac_rdpsnd_wave_info_handler(guac_rdp_common_svc* svc,
         wStream* input_stream, guac_rdpsnd_pdu_header* header) {
+
+    printf("+++++++++ %s\n", __func__);
 
     int format;
 
@@ -314,6 +324,8 @@ void guac_rdpsnd_wave_info_handler(guac_rdp_common_svc* svc,
 void guac_rdpsnd_wave_handler(guac_rdp_common_svc* svc,
         wStream* input_stream, guac_rdpsnd_pdu_header* header) {
 
+    printf("+++++++++ %s\n", __func__);
+
     guac_client* client = svc->client;
     guac_rdpsnd* rdpsnd = (guac_rdpsnd*) svc->data;
 
@@ -362,6 +374,8 @@ void guac_rdpsnd_wave_handler(guac_rdp_common_svc* svc,
 
 void guac_rdpsnd_close_handler(guac_rdp_common_svc* svc,
         wStream* input_stream, guac_rdpsnd_pdu_header* header) {
+
+    printf("+++++++++ %s\n", __func__);
 
     /* Do nothing */
 

@@ -28,9 +28,12 @@
 #include <winpr/stream.h>
 
 #include <stdlib.h>
+#include <stdio.h>
 
 void guac_rdpsnd_process_receive(guac_rdp_common_svc* svc,
         wStream* input_stream) {
+
+    printf("+++++++++ %s\n", __func__);
 
     guac_rdpsnd* rdpsnd = (guac_rdpsnd*) svc->data;
     guac_rdpsnd_pdu_header header;
@@ -86,17 +89,23 @@ void guac_rdpsnd_process_receive(guac_rdp_common_svc* svc,
 
 void guac_rdpsnd_process_connect(guac_rdp_common_svc* svc) {
 
+    printf("+++++++++ %s\n", __func__);
+
     guac_rdpsnd* rdpsnd = (guac_rdpsnd*) calloc(1, sizeof(guac_rdpsnd));
     svc->data = rdpsnd;
 
 }
 
 void guac_rdpsnd_process_terminate(guac_rdp_common_svc* svc) {
+    printf("+++++++++ %s\n", __func__);
+
     guac_rdpsnd* rdpsnd = (guac_rdpsnd*) svc->data;
     free(rdpsnd);
 }
 
 void guac_rdpsnd_load_plugin(rdpContext* context) {
+
+    printf("+++++++++ %s\n", __func__);
 
     guac_client* client = ((rdp_freerdp_context*) context)->client;
 

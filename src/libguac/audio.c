@@ -43,6 +43,8 @@
 static void guac_audio_stream_set_encoder(guac_audio_stream* audio,
         guac_audio_encoder* encoder) {
 
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
+
     /* Call handler, if defined */
     if (encoder != NULL && encoder->begin_handler)
         encoder->begin_handler(audio);
@@ -75,6 +77,8 @@ static void* guac_audio_assign_encoder(guac_user* user, void* data) {
 
     int i;
 
+    guac_user_log(user, GUAC_LOG_INFO, "+++++++++ %s", __func__);
+
     guac_audio_stream* audio = (guac_audio_stream*) data;
     int bps = audio->bps;
 
@@ -87,6 +91,7 @@ static void* guac_audio_assign_encoder(guac_user* user, void* data) {
     for (i=0; user->info.audio_mimetypes[i] != NULL; i++) {
 
         const char* mimetype = user->info.audio_mimetypes[i];
+        guac_user_log(user, GUAC_LOG_INFO, "+++++++++ %s: mimetype[%i]=%s", __func__, i, mimetype);
 
         /* If 16-bit raw audio is supported, done. */
         if (bps == 16 && strcmp(mimetype, raw16_encoder->mimetype) == 0) {
@@ -109,6 +114,8 @@ static void* guac_audio_assign_encoder(guac_user* user, void* data) {
 
 guac_audio_stream* guac_audio_stream_alloc(guac_client* client,
         guac_audio_encoder* encoder, int rate, int channels, int bps) {
+
+    guac_client_log(client, GUAC_LOG_INFO, "+++++++++ %s: encoder=%p", __func__, encoder);
 
     guac_audio_stream* audio;
 
@@ -133,12 +140,16 @@ guac_audio_stream* guac_audio_stream_alloc(guac_client* client,
         guac_audio_stream_set_encoder(audio, encoder);
 
     /* Otherwise, attempt to automatically assign encoder for owner */
-    if (audio->encoder == NULL)
+    if (audio->encoder == NULL) {
+        guac_client_log(client, GUAC_LOG_INFO, "+++++++++ guac_client_for_owner() called");
         guac_client_for_owner(client, guac_audio_assign_encoder, audio);
+    }
 
     /* Failing that, attempt to assign encoder for ANY connected user */
-    if (audio->encoder == NULL)
+    if (audio->encoder == NULL) {
+        guac_client_log(client, GUAC_LOG_INFO, "+++++++++ guac_client_foreach_user() called");
         guac_client_foreach_user(client, guac_audio_assign_encoder, audio);
+    }
 
     return audio;
 
@@ -146,6 +157,8 @@ guac_audio_stream* guac_audio_stream_alloc(guac_client* client,
 
 void guac_audio_stream_reset(guac_audio_stream* audio,
         guac_audio_encoder* encoder, int rate, int channels, int bps) {
+
+    guac_client_log(audio->client, GUAC_LOG_INFO, "+++++++++ %s: encoder=%p", __func__, encoder);
 
     /* Pull assigned encoder if no other encoder is requested */
     if (encoder == NULL)
@@ -175,6 +188,8 @@ void guac_audio_stream_reset(guac_audio_stream* audio,
 
 void guac_audio_stream_add_user(guac_audio_stream* audio, guac_user* user) {
 
+    guac_client_log(audio->client, GUAC_LOG_INFO, "+++++++++ %s", __func__);
+    
     /* Attempt to assign encoder if no encoder has yet been assigned */
     if (audio->encoder == NULL)
         guac_audio_assign_encoder(user, audio);
@@ -186,6 +201,8 @@ void guac_audio_stream_add_user(guac_audio_stream* audio, guac_user* user) {
 }
 
 void guac_audio_stream_free(guac_audio_stream* audio) {
+
+    guac_client_log(audio->client, GUAC_LOG_INFO, "+++++++++ %s", __func__);
 
     /* Flush stream encoding */
     guac_audio_stream_flush(audio);
@@ -205,6 +222,8 @@ void guac_audio_stream_free(guac_audio_stream* audio) {
 void guac_audio_stream_write_pcm(guac_audio_stream* audio, 
         const unsigned char* data, int length) {
 
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
+
     /* Write data */
     if (audio->encoder != NULL && audio->encoder->write_handler)
         audio->encoder->write_handler(audio, data, length);
@@ -212,6 +231,8 @@ void guac_audio_stream_write_pcm(guac_audio_stream* audio,
 }
 
 void guac_audio_stream_flush(guac_audio_stream* audio) {
+
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
 
     /* Flush any buffered data */
     if (audio->encoder != NULL && audio->encoder->flush_handler)

@@ -33,6 +33,8 @@
 static void raw_encoder_send_audio(guac_audio_stream* audio,
         guac_socket* socket) {
 
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
+
     char mimetype[256];
 
     /* Produce mimetype string from format info */
@@ -45,6 +47,8 @@ static void raw_encoder_send_audio(guac_audio_stream* audio,
 }
 
 static void raw_encoder_begin_handler(guac_audio_stream* audio) {
+
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
 
     raw_encoder_state* state;
 
@@ -65,12 +69,16 @@ static void raw_encoder_begin_handler(guac_audio_stream* audio) {
 static void raw_encoder_join_handler(guac_audio_stream* audio,
         guac_user* user) {
 
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
+
     /* Notify user of existence of stream */
     raw_encoder_send_audio(audio, user->socket);
 
 }
 
 static void raw_encoder_end_handler(guac_audio_stream* audio) {
+
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
 
     raw_encoder_state* state = (raw_encoder_state*) audio->data;
 
@@ -85,6 +93,8 @@ static void raw_encoder_end_handler(guac_audio_stream* audio) {
 
 static void raw_encoder_write_handler(guac_audio_stream* audio, 
         const unsigned char* pcm_data, int length) {
+
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
 
     raw_encoder_state* state = (raw_encoder_state*) audio->data;
 
@@ -116,6 +126,8 @@ static void raw_encoder_write_handler(guac_audio_stream* audio,
 }
 
 static void raw_encoder_flush_handler(guac_audio_stream* audio) {
+
+    guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
 
     raw_encoder_state* state = (raw_encoder_state*) audio->data;
     guac_socket* socket = audio->client->socket;
