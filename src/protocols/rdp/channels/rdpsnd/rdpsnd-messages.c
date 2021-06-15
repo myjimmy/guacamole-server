@@ -142,10 +142,10 @@ void guac_rdpsnd_formats_handler(guac_rdp_common_svc* svc,
             Stream_Seek(input_stream, body_size);
 
             /* If PCM, accept */
-            printf("+++++++++ %s: index=%d, server_format_count=%d, format=%d (%04x)\n",
-                    __func__, i, server_format_count, format_tag, format_tag);
+            printf("+++++++++ %s: index=%d, server_format_count=%d, format=%d (0x%04x) rate=%d channels=%d bps=%d\n",
+                    __func__, i, server_format_count, format_tag, format_tag, rate, channels, bps);
 
-            if (format_tag == WAVE_FORMAT_PCM) {
+            if (format_tag == WAVE_FORMAT_PCM) { // WAVE_FORMAT_AAC_MS, WAVE_FORMAT_PCM
 
                 /* If can fit another format, accept it */
                 if (rdpsnd->format_count < GUAC_RDP_MAX_FORMATS) {
@@ -270,8 +270,6 @@ void guac_rdpsnd_training_handler(guac_rdp_common_svc* svc,
 void guac_rdpsnd_wave_info_handler(guac_rdp_common_svc* svc,
         wStream* input_stream, guac_rdpsnd_pdu_header* header) {
 
-    printf("+++++++++ %s\n", __func__);
-
     int format;
 
     guac_client* client = svc->client;
@@ -306,6 +304,8 @@ void guac_rdpsnd_wave_info_handler(guac_rdp_common_svc* svc,
     rdpsnd->next_pdu_is_wave = TRUE;
 
     /* Reset audio stream if format has changed */
+    printf("+++++++++ %s:format=%d\n", __func__, format);
+
     if (audio != NULL) {
         if (format < GUAC_RDP_MAX_FORMATS)
             guac_audio_stream_reset(audio, NULL,
