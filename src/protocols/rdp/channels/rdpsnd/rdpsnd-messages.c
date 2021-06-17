@@ -145,7 +145,7 @@ void guac_rdpsnd_formats_handler(guac_rdp_common_svc* svc,
             printf("+++++++++ %s: index=%d, server_format_count=%d, format=%d (0x%04x) rate=%d channels=%d bps=%d\n",
                     __func__, i, server_format_count, format_tag, format_tag, rate, channels, bps);
 
-            if (format_tag == WAVE_FORMAT_PCM) { // WAVE_FORMAT_AAC_MS, WAVE_FORMAT_PCM
+            if (format_tag == WAVE_FORMAT_AAC_MS) { // WAVE_FORMAT_AAC_MS, WAVE_FORMAT_PCM
 
                 /* If can fit another format, accept it */
                 if (rdpsnd->format_count < GUAC_RDP_MAX_FORMATS) {
@@ -347,12 +347,12 @@ void guac_rdpsnd_wave_handler(guac_rdp_common_svc* svc,
     unsigned char* buffer = Stream_Buffer(input_stream);
 
     /* Copy over first four bytes */
-    memcpy(buffer, rdpsnd->initial_wave_data, 4);
+    // memcpy(buffer, rdpsnd->initial_wave_data, 4);
 
     /* Write rest of audio packet */
     if (audio != NULL) {
         guac_audio_stream_write_pcm(audio, buffer,
-                rdpsnd->incoming_wave_size + 4);
+                rdpsnd->incoming_wave_size);
         guac_audio_stream_flush(audio);
     }
 

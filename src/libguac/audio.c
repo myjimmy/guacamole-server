@@ -28,6 +28,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 /**
  * Sets the encoder associated with the given guac_audio_stream, automatically
@@ -189,7 +190,7 @@ void guac_audio_stream_reset(guac_audio_stream* audio,
 void guac_audio_stream_add_user(guac_audio_stream* audio, guac_user* user) {
 
     guac_client_log(audio->client, GUAC_LOG_INFO, "+++++++++ %s", __func__);
-    
+
     /* Attempt to assign encoder if no encoder has yet been assigned */
     if (audio->encoder == NULL)
         guac_audio_assign_encoder(user, audio);
@@ -223,6 +224,16 @@ void guac_audio_stream_write_pcm(guac_audio_stream* audio,
         const unsigned char* data, int length) {
 
     guac_client_log(audio->client, GUAC_LOG_INFO, "++++++++++ %s", __func__);
+
+#if 1
+    static int index = 0;
+    char filename[256] = {0};
+    sprintf(filename, "/home/ubuntu/Desktop/temp/audio-output-aac/audio-%04d.aac", index);
+    FILE* fp = fopen(filename, "wb");
+    fwrite(data, 1, length, fp);
+    fclose(fp);
+    index++;
+#endif
 
     /* Write data */
     if (audio->encoder != NULL && audio->encoder->write_handler)
