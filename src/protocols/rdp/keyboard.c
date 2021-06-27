@@ -533,8 +533,10 @@ static const guac_rdp_keysym_desc* guac_rdp_keyboard_send_defined_key(guac_rdp_k
     }
 
     /* Fire actual key event for target key */
+    printf("++++++++++ %s: STEP-1\n", __func__);
     guac_rdp_send_key_event(rdp_client, keysym_desc->scancode,
             keysym_desc->flags, pressed);
+    printf("++++++++++ %s: STEP-2\n", __func__);
 
     return keysym_desc;
 
@@ -637,24 +639,30 @@ int guac_rdp_keyboard_update_keysym(guac_rdp_keyboard* keyboard,
         int keysym, int pressed, guac_rdp_key_source source) {
 
     /* Synchronize lock keys states, if this has not yet been done */
+    printf("++++++++ %s: STEP-1\n", __func__);
     if (!keyboard->synchronized) {
 
         guac_client* client = keyboard->client;
         guac_rdp_client* rdp_client = (guac_rdp_client*) client->data;
 
         /* Synchronize remote lock key states with local state */
+        printf("++++++++ %s: STEP-2\n", __func__);
         guac_rdp_send_synchronize_event(rdp_client, keyboard->lock_flags);
+        printf("++++++++ %s: STEP-3\n", __func__);
         keyboard->synchronized = 1;
 
     }
 
+    printf("++++++++ %s: STEP-4\n", __func__);
     guac_rdp_key* key = guac_rdp_keyboard_get_key(keyboard, keysym);
+    printf("++++++++ %s: STEP-5\n", __func__);
 
     /* Update tracking of client-side keyboard state but only for keys which
      * are tracked server-side, as well (to ensure that the key count remains
      * correct, even if a user sends extra unbalanced or excessive press and
      * release events) */
     if (source == GUAC_RDP_KEY_SOURCE_CLIENT && key != NULL) {
+        printf("++++++++ %s: STEP-6\n", __func__);
         if (pressed && !key->user_pressed) {
             keyboard->user_pressed_keys++;
             key->user_pressed = 1;
@@ -665,10 +673,12 @@ int guac_rdp_keyboard_update_keysym(guac_rdp_keyboard* keyboard,
         }
     }
 
+    printf("++++++++ %s: STEP-7\n", __func__);
     /* Send events and update server-side lock state only if server-side key
      * state is changing (or if server-side state of this key is untracked) */
     if (key == NULL || (pressed && key->pressed == NULL) || (!pressed && key->pressed != NULL)) {
 
+        printf("++++++++ %s: STEP-8\n", __func__);
         /* Toggle locks on keydown */
         if (pressed)
             keyboard->lock_flags ^= guac_rdp_keyboard_lock_flag(keysym);
@@ -677,6 +687,7 @@ int guac_rdp_keyboard_update_keysym(guac_rdp_keyboard* keyboard,
          * events */
         const guac_rdp_keysym_desc* definition = NULL;
         if (key != NULL) {
+            printf("++++++++ %s: STEP-9\n", __func__);
             definition = guac_rdp_keyboard_send_defined_key(keyboard, key, pressed);
             key->pressed = pressed ? definition : NULL;
         }
@@ -685,6 +696,7 @@ int guac_rdp_keyboard_update_keysym(guac_rdp_keyboard* keyboard,
          * current keymap (note that we only handle "pressed" here, as neither
          * Unicode events nor dead keys can have a pressed/released state) */
         if (definition == NULL && pressed) {
+            printf("++++++++ %s: STEP-10\n", __func__);
             guac_rdp_keyboard_send_missing_key(keyboard, keysym);
         }
 
@@ -693,8 +705,10 @@ int guac_rdp_keyboard_update_keysym(guac_rdp_keyboard* keyboard,
     /* Reset RDP server keyboard state (releasing any automatically
      * pressed keys) once all keys have been released on the client
      * side */
-    if (source == GUAC_RDP_KEY_SOURCE_CLIENT && keyboard->user_pressed_keys == 0)
+    if (source == GUAC_RDP_KEY_SOURCE_CLIENT && keyboard->user_pressed_keys == 0) {
+        printf("++++++++ %s: STEP-11\n", __func__);
         guac_rdp_keyboard_reset(keyboard);
+    }
 
     return 0;
 

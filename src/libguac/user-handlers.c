@@ -167,6 +167,8 @@ int __guac_handle_touch(guac_user* user, int argc, char** argv) {
 }
 
 int __guac_handle_mouse(guac_user* user, int argc, char** argv) {
+
+    guac_user_log(user, GUAC_LOG_INFO, "++++++++++ mouse %s: argv[0]=%s, argv[1]=%s", __func__, argv[0], argv[1]);
     if (user->mouse_handler)
         return user->mouse_handler(
             user,

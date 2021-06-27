@@ -29,6 +29,8 @@
 
 int guacenc_handle_mouse(guacenc_display* display, int argc, char** argv) {
 
+    guacenc_log(GUAC_LOG_DEBUG, "+++++++++++++++++++++++++++ guacenc_handle_mouse: x: %d, y: %d", argv[0], argv[1]);
+
     /* Verify argument count */
     if (argc < 2) {
         guacenc_log(GUAC_LOG_WARNING, "\"mouse\" instruction incomplete");

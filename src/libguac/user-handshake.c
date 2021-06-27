@@ -140,9 +140,11 @@ static void* guac_user_input_thread(void* data) {
     /* Guacamole user input loop */
     while (client->state == GUAC_CLIENT_RUNNING && user->active) {
 
+        guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++ guac_user_input_thread 1");
         /* Read instruction, stop on error */
         if (guac_parser_read(parser, socket, usec_timeout)) {
 
+            guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++ guac_user_input_thread 2");
             if (guac_error == GUAC_STATUS_TIMEOUT)
                 guac_user_abort(user, GUAC_PROTOCOL_STATUS_CLIENT_TIMEOUT, "User is not responding.");
 
@@ -177,6 +179,7 @@ static void* guac_user_input_thread(void* data) {
         }
 
     }
+    guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++ guac_user_input_thread end");
 
     return NULL;
 
@@ -265,6 +268,7 @@ static int __guac_user_handshake(guac_user* user, guac_parser* parser,
         guac_user_log(user, GUAC_LOG_DEBUG, "Processing instruction: %s",
                 parser->opcode);
         
+        guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++ __guac_user_handshake");
         /* Run instruction handler for opcode with arguments. */
         if (__guac_user_call_opcode_handler(__guac_handshake_handler_map, user,
                 parser->opcode, parser->argc, parser->argv)) {

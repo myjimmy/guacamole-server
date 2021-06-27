@@ -163,24 +163,36 @@ int guac_rdp_user_key_handler(guac_user* user, int keysym, int pressed) {
     guac_rdp_client* rdp_client = (guac_rdp_client*) client->data;
     int retval = 0;
 
+    guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++++++ guac_rdp_user_key_handler STEP-1");
+
     pthread_rwlock_rdlock(&(rdp_client->lock));
+
+    guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++++++ guac_rdp_user_key_handler STEP-2");
 
     /* Report key state within recording */
     if (rdp_client->recording != NULL)
         guac_common_recording_report_key(rdp_client->recording,
                 keysym, pressed);
 
+    guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++++++ guac_rdp_user_key_handler STEP-3");
+
     /* Skip if keyboard not yet ready */
     if (rdp_client->keyboard == NULL)
         goto complete;
 
+
+    guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++++++ guac_rdp_user_key_handler STEP-4");
     /* Update keysym state */
     retval = guac_rdp_keyboard_update_keysym(rdp_client->keyboard,
                 keysym, pressed, GUAC_RDP_KEY_SOURCE_CLIENT);
 
 complete:
+
+    guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++++++ guac_rdp_user_key_handler STEP-5");
     pthread_rwlock_unlock(&(rdp_client->lock));
 
+
+    guac_user_log(user, GUAC_LOG_DEBUG, "++++++++++++++++++++++ guac_rdp_user_key_handler STEP-6");
     return retval;
 
 }
